@@ -48,6 +48,7 @@ float gas_reference = 250000;
 float hum_reference = 40;
 int   getgasreference_count = 0;
 
+// Change here your lorawan keys
 static u1_t NWKSKEY[16] = { 0xfe, 0xe3, 0xd0, 0xfc, 0x4b, 0xf2, 0xb5, 0x8d, 0x8f, 0x76, 0x99, 0x72, 0xf6, 0xe6, 0x7d, 0x2e };  // Paste here the key in MSB format
 static u1_t APPSKEY[16] = { 0xce, 0x9e, 0x5f, 0xeb, 0x3b, 0x72, 0x4a, 0xac, 0x8f, 0xea, 0xa9, 0xba, 0x47, 0xba, 0x99, 0x36 };  // Paste here the key in MSB format
 //static u4_t DEVADDR = 0x0323a162;   // ttgo-bme680-1
@@ -194,7 +195,7 @@ void do_send(osjob_t* j)
     Serial.println(F("---------------------------------------"));
 
     // Starting the Lorawan payload
-    uint8_t payload[20];
+    uint8_t payload[28];
     uint16_t payload_size = sizeof(payload);
 
     uint16_t tt_16 = tt * 100;
@@ -202,6 +203,9 @@ void do_send(osjob_t* j)
     uint32_t pr_32 = pr * 100;
     uint32_t gr_32 = gr * 100;
     uint32_t al_32 = al * 100;
+    uint32_t pm10_32 = data.pm10_standard;
+    uint32_t pm25_32 = data.pm25_standard;
+    uint32_t pm100_32 = data.pm100_standard;
 
     payload[0] = tt_16 >> 8;
     payload[1] = tt_16;
@@ -219,13 +223,25 @@ void do_send(osjob_t* j)
     payload[13] = al_32 >> 16;
     payload[14] = al_32 >> 8;
     payload[15] = al_32;
+    payload[16] = pm10_32 >> 24;
+    payload[17] = pm10_32 >> 16;
+    payload[18] = pm10_32 >> 8;
+    payload[19] = pm10_32;
+    payload[20] = pm25_32 >> 24;
+    payload[21] = pm25_32 >> 16;
+    payload[22] = pm25_32 >> 8;
+    payload[23] = pm25_32;
+    payload[24] = pm100_32 >> 24;
+    payload[25] = pm100_32 >> 16;
+    payload[26] = pm100_32 >> 8;
+    payload[27] = pm100_32;
 
     // Check if there is not a current TX/RX job running
     if (LMIC.opmode & OP_TXRXPEND) {
         Serial.println(F("OP_TXRXPEND, not sending"));
     } else {
         // Prepare upstream data transmission at the next possible time.
-        LMIC_setTxData2(1, payload, payload_size-1, 1);
+        LMIC_setTxData2(1, payload, payload_size, 1);
         Serial.print(F("Sending uplink packet..."));
         Serial.println(counter);
         digitalWrite(LEDPIN, HIGH);
