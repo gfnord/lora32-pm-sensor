@@ -84,7 +84,7 @@ void GetGasReference(){
 }
 
 String CalculateIAQ(float score){
-  String IAQ_text = "Air quality:";
+  String IAQ_text = "Air ";
   score = (100-score)*5;
   if      (score >= 301)                  IAQ_text += "Hazardous";
   else if (score >= 201 && score <= 300 ) IAQ_text += "Very Unhealthy";
@@ -247,18 +247,17 @@ void do_send(osjob_t* j)
         digitalWrite(LEDPIN, HIGH);
         display.clear();
         display.drawString (0, 0, "Sending uplink...");
-        display.drawString (0, 10, "Temp:");
-        display.drawString (35, 10, String(tt));
-        display.drawString (65, 10, "°C");
-        display.drawString (0, 20, "Humi:");
-        display.drawString (35, 20, String(hh));
-        display.drawString (65, 20, "%");
-        display.drawString (0, 30, "AQI:");
-        display.drawString (35, 30, String(air_quality_score,1));
-        display.drawString (65, 30, "%");
-        display.drawString (0, 40, String(CalculateIAQ(air_quality_score)));
+        display.drawString (0, 10, String(int(tt)));
+        display.drawString (12, 10, "°C");
+        display.drawString (28, 10, String(int(hh)));
+        display.drawString (40, 10, "%");
+        display.drawString (0, 20, String(CalculateIAQ(air_quality_score)));
         display.drawString (0, 50, String (counter));
-        display.display ();
+        display.drawString (0, 30, "PM 1.0 - PM 2.5 - PM 10.0");
+        display.drawString (0, 40, String(data.pm10_standard));
+        display.drawString (42, 40, String(data.pm25_standard));
+        display.drawString (84, 40, String(data.pm100_standard));
+        display.display();
     }
     // Next TX is scheduled after TX_COMPLETE event.
 }
@@ -350,7 +349,8 @@ void setup() {
 
   display.setTextAlignment (TEXT_ALIGN_LEFT);
 
-  display.drawString (0, 0, "Init...");
+  display.drawString (0, 0, "Starting device... ok");
+  display.drawString (0, 10, "Searching and calibrating... ");
   display.display ();
 
   I2Cone.begin(SDA, SCL, 100000);
